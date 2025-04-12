@@ -106,7 +106,10 @@
       const nominal = document.getElementById('nominal').value.trim();
       const base64Foto = preview.src.split(',')[1];
 
-      if (!nama || !uraian || !nominal || !base64Foto) return alert("Semua kolom harus diisi!");
+      if (!nama || !uraian || !nominal || !base64Foto) {
+        alert("Semua kolom harus diisi!");
+        return;
+      }
 
       const data = {
         nama,
@@ -115,14 +118,19 @@
         foto: base64Foto
       };
 
-      await fetch(scriptURL, {
-        method: 'POST',
-        body: JSON.stringify(data),
-      });
+      try {
+        await fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
 
-      alert("Data berhasil dikirim!");
-      document.getElementById('ledgerForm').reset();
-      preview.style.display = "none";
+        alert("Data berhasil dikirim!");
+        document.getElementById('ledgerForm').reset();
+        preview.style.display = "none";
+      } catch (error) {
+        alert("Gagal mengirim data. Silakan coba lagi.");
+        console.error(error);
+      }
     });
 
     function formatRupiah(input) {
