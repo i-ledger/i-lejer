@@ -39,7 +39,13 @@
     button:hover {
       background: #0d47a1;
     }
+    video, canvas {
+      width: 100%;
+      border-radius: 10px;
+      margin-top: 10px;
+    }
     #preview {
+      display: none;
       margin-top: 10px;
       max-width: 100%;
       border-radius: 10px;
@@ -55,12 +61,13 @@
     <textarea id="uraian" placeholder="Uraian" required></textarea>
     <input type="text" id="nominal" placeholder="Nominal (contoh: 200.000)" required oninput="formatRupiah(this)" />
 
-    <!-- Tombol Ambil Foto -->
-    <input type="file" id="foto" accept="image/*" capture="environment" style="display: none;" required />
-    <button type="button" onclick="document.getElementById('foto').click()">Ambil Foto</button>
+    <!-- Kamera langsung aktif -->
+    <video id="video" autoplay playsinline></video>
+    <button type="button" onclick="ambilFoto()">Ambil Foto</button>
 
     <!-- Preview Foto -->
-    <img id="preview" src="" alt="Preview Foto" style="display: none;" />
+    <canvas id="canvas" style="display: none;"></canvas>
+    <img id="preview" src="" alt="Preview Foto" />
 
     <button type="submit">Upload</button>
   </form>
@@ -68,20 +75,28 @@
   <script>
     const scriptURL = "https://script.google.com/macros/s/AKfycbz6CXFbeG8SKRbmlQKkZgzd-H9BFghbxDin4_0c0JE-lSKtfnueeh5K-_hERFGRldLL-Q/exec";
 
-    const fotoInput = document.getElementById('foto');
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
     const preview = document.getElementById('preview');
 
-    fotoInput.addEventListener('change', function() {
-      const file = this.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          preview.src = e.target.result;
-          preview.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      }
-    });
+    // Nyalakan kamera
+    navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+      .then(stream => {
+        video.srcObject = stream;
+      })
+      .catch(err => {
+        alert("Gagal mengakses kamera: " + err.message);
+      });
+
+    function ambilFoto() {
+      const context = canvas.getContext('2d');
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const dataURL = canvas.toDataURL('image/jpeg');
+      preview.src = dataURL;
+      preview.style.display = "block";
+    }
 
     document.getElementById('ledgerForm').addEventListener('submit', async function(e) {
       e.preventDefault();
@@ -89,31 +104,25 @@
       const nama = document.getElementById('nama').value.trim();
       const uraian = document.getElementById('uraian').value.trim();
       const nominal = document.getElementById('nominal').value.trim();
-      const foto = fotoInput.files[0];
+      const base64Foto = preview.src.split(',')[1];
 
-      if (!nama || !uraian || !nominal || !foto) return alert("Semua kolom harus diisi!");
+      if (!nama || !uraian || !nominal || !base64Foto) return alert("Semua kolom harus diisi!");
 
-      const reader = new FileReader();
-      reader.onload = async function() {
-        const base64Foto = reader.result.split(',')[1];
-
-        const data = {
-          nama,
-          uraian,
-          nominal,
-          foto: base64Foto
-        };
-
-        await fetch(scriptURL, {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
-
-        alert("Data berhasil dikirim!");
-        document.getElementById('ledgerForm').reset();
-        preview.style.display = "none";
+      const data = {
+        nama,
+        uraian,
+        nominal,
+        foto: base64Foto
       };
-      reader.readAsDataURL(foto);
+
+      await fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(data),
+      });
+
+      alert("Data berhasil dikirim!");
+      document.getElementById('ledgerForm').reset();
+      preview.style.display = "none";
     });
 
     function formatRupiah(input) {
