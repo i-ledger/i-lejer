@@ -50,7 +50,7 @@
     <textarea id="uraian" placeholder="Uraian" required></textarea>
     <input type="text" id="nominal" placeholder="Nominal (contoh: 200.000)" required oninput="formatRupiah(this)" />
     <input type="file" id="foto" accept="image/*" capture="environment" required />
-    <button type="submit">Upload</button>
+    <button type="submit" id="submitBtn">Upload</button>
   </form>
 
   <script>
@@ -63,8 +63,12 @@
       const uraian = document.getElementById('uraian').value.trim();
       const nominal = document.getElementById('nominal').value.trim();
       const foto = document.getElementById('foto').files[0];
+      const btn = document.getElementById('submitBtn');
 
       if (!nama || !uraian || !nominal || !foto) return alert("Semua kolom harus diisi!");
+
+      btn.disabled = true;
+      btn.innerText = "Mengirim...";
 
       const reader = new FileReader();
       reader.onload = async function() {
@@ -77,13 +81,20 @@
           foto: base64Foto
         };
 
-        await fetch(scriptURL, {
-          method: 'POST',
-          body: JSON.stringify(data),
-        });
+        try {
+          const res = await fetch(scriptURL, {
+            method: 'POST',
+            body: JSON.stringify(data),
+          });
 
-        alert("Data berhasil dikirim!");
-        document.getElementById('ledgerForm').reset();
+          alert("Data berhasil dikirim!");
+          document.getElementById('ledgerForm').reset();
+        } catch (err) {
+          alert("Gagal mengirim data.");
+        } finally {
+          btn.disabled = false;
+          btn.innerText = "Upload";
+        }
       };
       reader.readAsDataURL(foto);
     });
