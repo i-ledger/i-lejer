@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>i-ledger</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f4f6f8;
+      background: #f4f4f4;
       padding: 20px;
     }
     h1 {
@@ -17,28 +17,27 @@
     form {
       max-width: 500px;
       margin: auto;
-      background: #fff;
+      background: white;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
     input, textarea, button {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
-      margin-bottom: 15px;
+      border-radius: 5px;
       border: 1px solid #ccc;
-      border-radius: 6px;
-      font-size: 16px;
+      box-sizing: border-box;
     }
     button {
-      background-color: #1976d2;
+      background: #1976d2;
       color: white;
       border: none;
       cursor: pointer;
     }
     button:hover {
-      background-color: #0d47a1;
+      background: #0d47a1;
     }
   </style>
 </head>
@@ -47,27 +46,52 @@
   <h1>i-ledger</h1>
 
   <form id="ledgerForm">
-    <input type="text" id="nama" placeholder="Nama" required>
-    <textarea id="uraian" placeholder="Uraian" rows="3" required></textarea>
-    <input type="text" id="nominal" placeholder="Nominal (contoh: 200.000)" required oninput="formatRupiah(this)">
-    
-    <input type="file" id="foto" accept="image/*" capture="environment" required>
-    
+    <input type="text" id="nama" placeholder="Nama" required />
+    <textarea id="uraian" placeholder="Uraian" required></textarea>
+    <input type="text" id="nominal" placeholder="Nominal (contoh: 200.000)" required oninput="formatRupiah(this)" />
+    <input type="file" id="foto" accept="image/*" capture="environment" required />
     <button type="submit">Upload</button>
   </form>
 
   <script>
-    function formatRupiah(input) {
-      let angka = input.value.replace(/[^\d]/g, '');
-      let rupiah = new Intl.NumberFormat('id-ID').format(angka);
-      input.value = rupiah;
-    }
+    const scriptURL = "https://script.google.com/macros/s/AKfycbz6CXFbeG8SKRbmlQKkZgzd-H9BFghbxDin4_0c0JE-lSKtfnueeh5K-_hERFGRldLL-Q/exec";
 
-    document.getElementById('ledgerForm').addEventListener('submit', function(e) {
+    document.getElementById('ledgerForm').addEventListener('submit', async function(e) {
       e.preventDefault();
-      alert("Data siap dikirim! (Fungsi upload bisa disambung ke server/Google Sheet nanti)");
-      // Di sini nanti ditambahkan upload ke server atau Google Apps Script
+
+      const nama = document.getElementById('nama').value.trim();
+      const uraian = document.getElementById('uraian').value.trim();
+      const nominal = document.getElementById('nominal').value.trim();
+      const foto = document.getElementById('foto').files[0];
+
+      if (!nama || !uraian || !nominal || !foto) return alert("Semua kolom harus diisi!");
+
+      const reader = new FileReader();
+      reader.onload = async function() {
+        const base64Foto = reader.result.split(',')[1];
+
+        const data = {
+          nama,
+          uraian,
+          nominal,
+          foto: base64Foto
+        };
+
+        await fetch(scriptURL, {
+          method: 'POST',
+          body: JSON.stringify(data),
+        });
+
+        alert("Data berhasil dikirim!");
+        document.getElementById('ledgerForm').reset();
+      };
+      reader.readAsDataURL(foto);
     });
+
+    function formatRupiah(input) {
+      let value = input.value.replace(/\D/g, '');
+      input.value = new Intl.NumberFormat('id-ID').format(value);
+    }
   </script>
 
 </body>
