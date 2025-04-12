@@ -36,6 +36,10 @@
     img {
       max-width: 100px;
       border-radius: 5px;
+      transition: transform 0.2s ease;
+    }
+    img:hover {
+      transform: scale(1.5);
     }
     .container {
       max-width: 1000px;
@@ -70,7 +74,7 @@
         data.forEach(row => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td>${row[0]}</td>
+            <td>${new Date(row[0]).toLocaleString('id-ID')}</td>
             <td>${row[1]}</td>
             <td>${row[2]}</td>
             <td>Rp ${Number(row[3]).toLocaleString('id-ID')}</td>
