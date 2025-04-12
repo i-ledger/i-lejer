@@ -39,16 +39,14 @@
     button:hover {
       background: #0d47a1;
     }
-    video, canvas {
+    video, canvas, img {
       width: 100%;
       border-radius: 10px;
       margin-top: 10px;
     }
     #preview {
       display: none;
-      margin-top: 10px;
       max-width: 100%;
-      border-radius: 10px;
     }
   </style>
 </head>
@@ -63,13 +61,17 @@
 
     <!-- Kamera langsung aktif -->
     <video id="video" autoplay playsinline></video>
-    <button type="button" onclick="ambilFoto()">Ambil Foto</button>
+    <button type="button" onclick="ambilFoto()">Ambil Foto dari Kamera</button>
+
+    <!-- Upload Foto Manual -->
+    <input type="file" id="uploadFile" accept="image/*" />
+    <button type="button" onclick="uploadManual()">Upload Foto dari File</button>
 
     <!-- Preview Foto -->
     <canvas id="canvas" style="display: none;"></canvas>
     <img id="preview" src="" alt="Preview Foto" />
 
-    <button type="submit">Upload</button>
+    <button type="submit">Submit</button>
   </form>
 
   <script>
@@ -78,8 +80,9 @@
     const video = document.getElementById('video');
     const canvas = document.getElementById('canvas');
     const preview = document.getElementById('preview');
+    const uploadFile = document.getElementById('uploadFile');
 
-    // Nyalakan kamera
+    // Nyalakan kamera belakang
     navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
       .then(stream => {
         video.srcObject = stream;
@@ -98,16 +101,31 @@
       preview.style.display = "block";
     }
 
+    function uploadManual() {
+      const file = uploadFile.files[0];
+      if (!file) {
+        alert("Pilih file terlebih dahulu.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        preview.src = e.target.result;
+        preview.style.display = "block";
+      };
+      reader.readAsDataURL(file);
+    }
+
     document.getElementById('ledgerForm').addEventListener('submit', async function(e) {
       e.preventDefault();
 
       const nama = document.getElementById('nama').value.trim();
       const uraian = document.getElementById('uraian').value.trim();
       const nominal = document.getElementById('nominal').value.trim();
-      const base64Foto = preview.src.split(',')[1];
+      const base64Foto = preview.src.includes(',') ? preview.src.split(',')[1] : "";
 
       if (!nama || !uraian || !nominal || !base64Foto) {
-        alert("Semua kolom harus diisi!");
+        alert("Semua kolom harus diisi, termasuk foto!");
         return;
       }
 
