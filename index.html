@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>i-ledger</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f8;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #1976d2;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    input, textarea, button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      font-size: 16px;
+    }
+    button {
+      background-color: #1976d2;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0d47a1;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>i-ledger</h1>
+
+  <form id="ledgerForm">
+    <input type="text" id="nama" placeholder="Nama" required>
+    <textarea id="uraian" placeholder="Uraian" rows="3" required></textarea>
+    <input type="text" id="nominal" placeholder="Nominal (contoh: 200.000)" required oninput="formatRupiah(this)">
+    
+    <input type="file" id="foto" accept="image/*" capture="environment" required>
+    
+    <button type="submit">Upload</button>
+  </form>
+
+  <script>
+    function formatRupiah(input) {
+      let angka = input.value.replace(/[^\d]/g, '');
+      let rupiah = new Intl.NumberFormat('id-ID').format(angka);
+      input.value = rupiah;
+    }
+
+    document.getElementById('ledgerForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      alert("Data siap dikirim! (Fungsi upload bisa disambung ke server/Google Sheet nanti)");
+      // Di sini nanti ditambahkan upload ke server atau Google Apps Script
+    });
+  </script>
+
+</body>
+</html>
