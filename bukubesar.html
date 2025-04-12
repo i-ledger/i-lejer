@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Data Buku Besar</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #1976d2;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    th, td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      text-align: left;
+      font-size: 14px;
+    }
+    th {
+      background: #1976d2;
+      color: white;
+    }
+    img {
+      max-width: 100px;
+      border-radius: 5px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📘 Data Buku Besar</h1>
+    <table id="dataTable">
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Nama</th>
+          <th>Uraian</th>
+          <th>Nominal</th>
+          <th>Bukti</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    const sheetURL = "https://script.google.com/macros/s/AKfycbz6CXFbeG8SKRbmlQKkZgzd-H9BFghbxDin4_0c0JE-lSKtfnueeh5K-_hERFGRldLL-Q/exec";
+
+    fetch(sheetURL)
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.querySelector("#dataTable tbody");
+        data.forEach(row => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${row[0]}</td>
+            <td>${row[1]}</td>
+            <td>${row[2]}</td>
+            <td>Rp ${Number(row[3]).toLocaleString('id-ID')}</td>
+            <td><a href="${row[4]}" target="_blank"><img src="${row[4]}" alt="bukti"></a></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      })
+      .catch(err => {
+        alert("Gagal mengambil data");
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
